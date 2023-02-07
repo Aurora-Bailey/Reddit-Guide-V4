@@ -1,12 +1,11 @@
-const axios = require("axios")
-const config = require("../../reddit_credentials.json")
-const auth = require("./auth.js")
+import axios from "axios"
+import auth from "./auth"
 
 class Api {
   constructor() {}
 
   // (array)
-  async info(items) {
+  async info(items: string[]) {
     let token = await auth.accessToken()
     let url = "https://oauth.reddit.com/api/info"
     let params = { id: items.join(",") }
@@ -24,7 +23,7 @@ class Api {
   }
 
   // (string)
-  async topPosts(subreddit) {
+  async topPosts(subreddit: string) {
     let token = await auth.accessToken()
     let url = `https://oauth.reddit.com/r/${subreddit}/top`
     let params = { t: "month", limit: 20 }
@@ -42,4 +41,4 @@ class Api {
   }
 }
 
-module.exports = new Api()
+export default new Api()
