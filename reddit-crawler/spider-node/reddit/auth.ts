@@ -2,16 +2,6 @@ import axios from "axios"
 import * as credentials from "./reddit_credentials.json"
 declare const Buffer
 
-interface Auth {
-  token: {
-    access_token: string
-    token_type: string
-    expires_in: number
-    scope: string
-    expires_at: number
-  }
-}
-
 class Auth {
   token: {
     access_token: string

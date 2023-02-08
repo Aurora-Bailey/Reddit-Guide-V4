@@ -36,35 +36,50 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var api_1 = require("./reddit/api");
-var mongodb_1 = require("./mongodb");
-var Main = /** @class */ (function () {
-    function Main() {
+var mongodb_1 = require("mongodb");
+var Mongo = /** @class */ (function () {
+    function Mongo() {
+        this.url = "mongodb://localhost:27017";
+        this.client = null;
     }
-    Main.prototype.start = function () {
-        var _a;
+    Mongo.prototype.close = function () {
+        if (this.client)
+            this.client.close();
+        console.log("-- Mongodb connection closed on " + this.url);
+    };
+    Mongo.prototype.db = function (dbName) {
         return __awaiter(this, void 0, void 0, function () {
-            var db, response;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, api_1["default"].info(["t1_j71qaa3"])];
+            var client;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.connect()];
                     case 1:
-                        response = _b.sent();
-                        if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, mongodb_1["default"].db("reddit-data")];
-                    case 2:
-                        db = _b.sent();
-                        db.collection("comments")
-                            .insertMany(response.list.map(function (e) {
-                            return e.data;
-                        }))["catch"](console.log);
-                        _b.label = 3;
-                    case 3: return [2 /*return*/];
+                        client = _a.sent();
+                        return [2 /*return*/, client.db(dbName)];
                 }
             });
         });
     };
-    return Main;
+    Mongo.prototype.connect = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!this.client) return [3 /*break*/, 1];
+                        return [2 /*return*/, this.client];
+                    case 1:
+                        _a = this;
+                        return [4 /*yield*/, mongodb_1.MongoClient.connect(this.url)];
+                    case 2:
+                        _a.client = _b.sent();
+                        console.log("-- Mongodb connection opened on " + this.url);
+                        return [2 /*return*/, this.client];
+                }
+            });
+        });
+    };
+    return Mongo;
 }());
-var main = new Main();
-main.start();
+exports["default"] = new Mongo();
+// await mongodb.db('reddit-guide')
