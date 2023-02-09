@@ -1,5 +1,5 @@
 import api from "./reddit/api"
-import mongodb from "./mongodb"
+import mongodb from "./tools/mongodb"
 
 class Main {
   constructor() {}
