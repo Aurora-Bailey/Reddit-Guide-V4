@@ -5,8 +5,8 @@
   "main": "index",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc index.ts --resolveJsonModule",
-    "dev": "tsc index.ts --resolveJsonModule && node index.js"
+    "build": "tsc app/index.ts --resolveJsonModule",
+    "dev": "tsc app/index.ts --resolveJsonModule && node index.js"
   },
   "author": "",
   "license": "ISC",
