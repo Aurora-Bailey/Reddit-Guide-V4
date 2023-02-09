@@ -1,5 +1,4 @@
 import axios from "axios"
-import * as credentials from "./reddit_credentials.json"
 declare const Buffer
 
 class Auth {
@@ -10,6 +9,16 @@ class Auth {
     scope: string
     expires_at: number
   }
+  credentials: {
+    version: string
+    name: string
+    type: string
+    developer: string
+    url: string
+    app_id: string
+    secret: string
+    id: string
+  }
 
   constructor() {
     this.token = {
@@ -19,10 +28,21 @@ class Auth {
       scope: "*",
       expires_at: 0,
     }
+    this.credentials = {
+      version: "",
+      name: "",
+      type: "",
+      developer: "",
+      url: "",
+      app_id: "",
+      secret: "",
+      id: "",
+    }
   }
 
-  userAgent(): string {
-    return `node:${credentials.app_id}:v${credentials.version} (by /u/${credentials.developer})`.toLowerCase()
+  userAgent(credentials = this.credentials): string {
+    this.credentials = credentials
+    return `node:${this.credentials.app_id}:v${this.credentials.version} (by /u/${this.credentials.developer})`.toLowerCase()
   }
 
   private async requestAccessToken() {
@@ -32,17 +52,19 @@ class Auth {
       authorization:
         "Basic " +
         Buffer.from(
-          credentials.client.id + ":" + credentials.client.secret
+          this.credentials.id + ":" + this.credentials.secret
         ).toString("base64"),
       "User-Agent": this.userAgent(),
     }
 
     let response = await axios.post(url, postData, { headers })
+    console.log("Request reddit token with id: " + this.credentials.id)
     if (!response.data.error) return response.data
     else throw response.data
   }
 
-  async accessToken() {
+  async accessToken(credentials = this.credentials) {
+    this.credentials = credentials
     if (this.token.expires_at > Date.now()) return this.token
     else {
       let token = await this.requestAccessToken()

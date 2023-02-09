@@ -5,16 +5,17 @@ class Api {
   constructor() {}
 
   // (array)
-  async info(items: string[]) {
-    let token = await auth.accessToken()
+  async info(credentials, items: string[]) {
+    let token = await auth.accessToken(credentials)
     let url = "https://oauth.reddit.com/api/info"
     let params = { id: items.join(",") }
     let headers = {
       Authorization: token.token_type + " " + token.access_token,
-      "User-Agent": auth.userAgent(),
+      "User-Agent": auth.userAgent(credentials),
     }
 
     let response = await axios.get(url, { params, headers })
+    console.log("Request reddit info with id: " + credentials.id)
     if (response.status !== 200) throw response.status
 
     let list = response.data.data.children
@@ -23,13 +24,13 @@ class Api {
   }
 
   // (string)
-  async topPosts(subreddit: string) {
-    let token = await auth.accessToken()
+  async topPosts(credentials, subreddit: string) {
+    let token = await auth.accessToken(credentials)
     let url = `https://oauth.reddit.com/r/${subreddit}/top`
     let params = { t: "month", limit: 20 }
     let headers = {
       Authorization: token.token_type + " " + token.access_token,
-      "User-Agent": auth.userAgent(),
+      "User-Agent": auth.userAgent(credentials),
     }
 
     let response = await axios.get(url, { params, headers })

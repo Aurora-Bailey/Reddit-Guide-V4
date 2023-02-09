@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var axios_1 = require("axios");
-var credentials = require("./reddit_credentials.json");
 var Auth = /** @class */ (function () {
     function Auth() {
         this.token = {
@@ -47,9 +46,21 @@ var Auth = /** @class */ (function () {
             scope: "*",
             expires_at: 0
         };
+        this.credentials = {
+            version: "",
+            name: "",
+            type: "",
+            developer: "",
+            url: "",
+            app_id: "",
+            secret: "",
+            id: ""
+        };
     }
-    Auth.prototype.userAgent = function () {
-        return "node:".concat(credentials.app_id, ":v").concat(credentials.version, " (by /u/").concat(credentials.developer, ")").toLowerCase();
+    Auth.prototype.userAgent = function (credentials) {
+        if (credentials === void 0) { credentials = this.credentials; }
+        this.credentials = credentials;
+        return "node:".concat(this.credentials.app_id, ":v").concat(this.credentials.version, " (by /u/").concat(this.credentials.developer, ")").toLowerCase();
     };
     Auth.prototype.requestAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -61,12 +72,13 @@ var Auth = /** @class */ (function () {
                         postData = "grant_type=client_credentials";
                         headers = {
                             authorization: "Basic " +
-                                Buffer.from(credentials.client.id + ":" + credentials.client.secret).toString("base64"),
+                                Buffer.from(this.credentials.id + ":" + this.credentials.secret).toString("base64"),
                             "User-Agent": this.userAgent()
                         };
                         return [4 /*yield*/, axios_1["default"].post(url, postData, { headers: headers })];
                     case 1:
                         response = _a.sent();
+                        console.log("Request reddit token with id: " + this.credentials.id);
                         if (!response.data.error)
                             return [2 /*return*/, response.data];
                         else
@@ -76,12 +88,14 @@ var Auth = /** @class */ (function () {
             });
         });
     };
-    Auth.prototype.accessToken = function () {
+    Auth.prototype.accessToken = function (credentials) {
+        if (credentials === void 0) { credentials = this.credentials; }
         return __awaiter(this, void 0, void 0, function () {
             var token;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        this.credentials = credentials;
                         if (!(this.token.expires_at > Date.now())) return [3 /*break*/, 1];
                         return [2 /*return*/, this.token];
                     case 1: return [4 /*yield*/, this.requestAccessToken()];

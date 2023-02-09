@@ -4,12 +4,12 @@ A reddit id consists of 2 parts. The "t1\_" part and the base 36 number followin
 
 ## Reddit id prefix
 
-t1* Comment
-t2* Account
-t3* Link
-t4* Message
-t5* Subreddit
-t6* Award
+- t1\_ Comment
+- t2\_ Account
+- t3\_ Link (posts)
+- t4\_ Message
+- t5\_ Subreddit
+- t6\_ Award
 
 ## Reddit id string to number
 

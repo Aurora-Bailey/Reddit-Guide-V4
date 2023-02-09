@@ -42,23 +42,24 @@ var Api = /** @class */ (function () {
     function Api() {
     }
     // (array)
-    Api.prototype.info = function (items) {
+    Api.prototype.info = function (credentials, items) {
         return __awaiter(this, void 0, void 0, function () {
             var token, url, params, headers, response, list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, auth_1["default"].accessToken()];
+                    case 0: return [4 /*yield*/, auth_1["default"].accessToken(credentials)];
                     case 1:
                         token = _a.sent();
                         url = "https://oauth.reddit.com/api/info";
                         params = { id: items.join(",") };
                         headers = {
                             Authorization: token.token_type + " " + token.access_token,
-                            "User-Agent": auth_1["default"].userAgent()
+                            "User-Agent": auth_1["default"].userAgent(credentials)
                         };
                         return [4 /*yield*/, axios_1["default"].get(url, { params: params, headers: headers })];
                     case 2:
                         response = _a.sent();
+                        console.log("Request reddit info with id: " + credentials.id);
                         if (response.status !== 200)
                             throw response.status;
                         list = response.data.data.children;
@@ -68,19 +69,19 @@ var Api = /** @class */ (function () {
         });
     };
     // (string)
-    Api.prototype.topPosts = function (subreddit) {
+    Api.prototype.topPosts = function (credentials, subreddit) {
         return __awaiter(this, void 0, void 0, function () {
             var token, url, params, headers, response, list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, auth_1["default"].accessToken()];
+                    case 0: return [4 /*yield*/, auth_1["default"].accessToken(credentials)];
                     case 1:
                         token = _a.sent();
                         url = "https://oauth.reddit.com/r/".concat(subreddit, "/top");
                         params = { t: "month", limit: 20 };
                         headers = {
                             Authorization: token.token_type + " " + token.access_token,
-                            "User-Agent": auth_1["default"].userAgent()
+                            "User-Agent": auth_1["default"].userAgent(credentials)
                         };
                         return [4 /*yield*/, axios_1["default"].get(url, { params: params, headers: headers })];
                     case 2:

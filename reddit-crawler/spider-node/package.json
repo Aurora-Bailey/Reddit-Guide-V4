@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc app/index.ts --resolveJsonModule",
-    "dev": "tsc app/index.ts --resolveJsonModule && node index.js"
+    "dev": "tsc app/index.ts --resolveJsonModule && node app/index.js"
   },
   "author": "",
   "license": "ISC",
