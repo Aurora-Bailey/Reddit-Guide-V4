@@ -58,30 +58,113 @@ var Main = /** @class */ (function () {
         this.current_target = "";
     }
     Main.prototype.start = function () {
-        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var db, response;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var db;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0: return [4 /*yield*/, this.registerSpider()];
                     case 1:
-                        _b.sent();
-                        return [4 /*yield*/, api_1["default"].info(this.credentials, [
-                                "t1_j71qba2",
-                                "t1_j71qba1",
-                            ])];
-                    case 2:
-                        response = _b.sent();
-                        if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 4];
+                        _a.sent();
+                        this.t1LoopStart();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Main.prototype.t1LoopStart = function () {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var db_RedditCrawler, db_RedditData, res, indexBefore, indexAfter, arr, response;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, mongodb_1["default"].db("reddit-crawler")];
+                    case 1:
+                        db_RedditCrawler = _b.sent();
                         return [4 /*yield*/, mongodb_1["default"].db("reddit-data")];
+                    case 2:
+                        db_RedditData = _b.sent();
+                        return [4 /*yield*/, db_RedditCrawler
+                                .collection("head")
+                                .findOneAndUpdate({ tracking: "t1_" }, { $inc: { index: 100 } }, { returnDocument: "before" })];
                     case 3:
-                        db = _b.sent();
-                        db.collection("comments")
-                            .insertMany(response.list.map(function (e) {
-                            return e.data;
-                        }))["catch"](console.log);
-                        _b.label = 4;
-                    case 4: return [2 /*return*/];
+                        res = _b.sent();
+                        indexBefore = res.value.index;
+                        indexAfter = indexBefore + 100;
+                        arr = Array.from(Array(100).keys()).map(function (i) {
+                            return "t1_" + parseInt(i + indexBefore).toString(36);
+                        });
+                        return [4 /*yield*/, api_1["default"].info(this.credentials, arr)];
+                    case 4:
+                        response = _b.sent();
+                        if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 7];
+                        return [4 /*yield*/, db_RedditData
+                                .collection("comments")
+                                .insertMany(response.list.map(function (e) {
+                                return e.data;
+                            }))["catch"](console.log)];
+                    case 5:
+                        _b.sent();
+                        return [4 /*yield*/, db_RedditCrawler
+                                .collection("spider")
+                                .updateOne({ spider_name: this.spider_name }, { $set: { last_update: Date.now() } })];
+                    case 6:
+                        _b.sent();
+                        _b.label = 7;
+                    case 7:
+                        setTimeout(function () {
+                            _this.t1LoopStart();
+                        }, 1000);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Main.prototype.t2LoopStart = function () {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var db_RedditCrawler, db_RedditData, res, indexBefore, indexAfter, arr, response;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, mongodb_1["default"].db("reddit-crawler")];
+                    case 1:
+                        db_RedditCrawler = _b.sent();
+                        return [4 /*yield*/, mongodb_1["default"].db("reddit-data")];
+                    case 2:
+                        db_RedditData = _b.sent();
+                        return [4 /*yield*/, db_RedditCrawler
+                                .collection("head")
+                                .findOneAndUpdate({ tracking: "t2_" }, { $inc: { index: 100 } }, { returnDocument: "before" })];
+                    case 3:
+                        res = _b.sent();
+                        indexBefore = res.value.index;
+                        indexAfter = indexBefore + 100;
+                        arr = Array.from(Array(100).keys()).map(function (i) {
+                            return "t2_" + parseInt(i + indexBefore).toString(36);
+                        });
+                        return [4 /*yield*/, api_1["default"].info(this.credentials, arr)];
+                    case 4:
+                        response = _b.sent();
+                        if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 7];
+                        return [4 /*yield*/, db_RedditData
+                                .collection("posts")
+                                .insertMany(response.list.map(function (e) {
+                                return e.data;
+                            }))["catch"](console.log)];
+                    case 5:
+                        _b.sent();
+                        return [4 /*yield*/, db_RedditCrawler
+                                .collection("spider")
+                                .updateOne({ spider_name: this.spider_name }, { $set: { last_update: Date.now() } })];
+                    case 6:
+                        _b.sent();
+                        _b.label = 7;
+                    case 7:
+                        setTimeout(function () {
+                            _this.t2LoopStart();
+                        }, 1000);
+                        return [2 /*return*/];
                 }
             });
         });

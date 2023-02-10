@@ -43,20 +43,101 @@ class Main {
 
     await this.registerSpider()
 
-    let response = await api.info(this.credentials, [
-      "t1_j71qba2",
-      "t1_j71qba1",
-    ])
+    this.t1LoopStart()
+  }
+
+  public async t1LoopStart() {
+    let db_RedditCrawler: any
+    db_RedditCrawler = await mongodb.db("reddit-crawler")
+
+    let db_RedditData: any
+    db_RedditData = await mongodb.db("reddit-data")
+
+    let res = await db_RedditCrawler
+      .collection("head")
+      .findOneAndUpdate(
+        { tracking: "t1_" },
+        { $inc: { index: 100 } },
+        { returnDocument: "before" }
+      )
+    let indexBefore = res.value.index
+    let indexAfter = indexBefore + 100
+
+    // ['t1_698', 't1_699', 't1_69a']
+    let arr = Array.from(Array(100).keys()).map((i) => {
+      return "t1_" + parseInt(i + indexBefore).toString(36)
+    })
+
+    let response = await api.info(this.credentials, arr)
+
     if (response?.response?.status === 200) {
-      db = await mongodb.db("reddit-data")
-      db.collection("comments")
+      await db_RedditData
+        .collection("comments")
         .insertMany(
           response.list.map((e) => {
             return e.data
           })
         )
         .catch(console.log)
+
+      await db_RedditCrawler
+        .collection("spider")
+        .updateOne(
+          { spider_name: this.spider_name },
+          { $set: { last_update: Date.now() } }
+        )
     }
+
+    setTimeout(() => {
+      this.t1LoopStart()
+    }, 1000)
+  }
+
+  public async t2LoopStart() {
+    let db_RedditCrawler: any
+    db_RedditCrawler = await mongodb.db("reddit-crawler")
+
+    let db_RedditData: any
+    db_RedditData = await mongodb.db("reddit-data")
+
+    let res = await db_RedditCrawler
+      .collection("head")
+      .findOneAndUpdate(
+        { tracking: "t2_" },
+        { $inc: { index: 100 } },
+        { returnDocument: "before" }
+      )
+    let indexBefore = res.value.index
+    let indexAfter = indexBefore + 100
+
+    // ['t2_698', 't2_699', 't2_69a']
+    let arr = Array.from(Array(100).keys()).map((i) => {
+      return "t2_" + parseInt(i + indexBefore).toString(36)
+    })
+
+    let response = await api.info(this.credentials, arr)
+
+    if (response?.response?.status === 200) {
+      await db_RedditData
+        .collection("posts")
+        .insertMany(
+          response.list.map((e) => {
+            return e.data
+          })
+        )
+        .catch(console.log)
+
+      await db_RedditCrawler
+        .collection("spider")
+        .updateOne(
+          { spider_name: this.spider_name },
+          { $set: { last_update: Date.now() } }
+        )
+    }
+
+    setTimeout(() => {
+      this.t2LoopStart()
+    }, 1000)
   }
 
   public async registerSpider() {
