@@ -43,7 +43,8 @@ class Main {
 
     await this.registerSpider()
 
-    this.t1LoopStart()
+    if (this.current_target === "t1_") this.t1LoopStart() // comments
+    if (this.current_target === "t3_") this.t3LoopStart() // posts
   }
 
   public async t1LoopStart() {
@@ -60,6 +61,13 @@ class Main {
         { $inc: { index: 100 } },
         { returnDocument: "before" }
       )
+
+    if (res.value === null) {
+      let tracker = { tracking: "t1_", index: 1, name: "comment" }
+      await db_RedditCrawler.collection("head").insertOne(tracker)
+      res = { value: tracker }
+    }
+
     let indexBefore = res.value.index
     let indexAfter = indexBefore + 100
 
@@ -71,21 +79,35 @@ class Main {
     let response = await api.info(this.credentials, arr)
 
     if (response?.response?.status === 200) {
-      await db_RedditData
-        .collection("comments")
-        .insertMany(
-          response.list.map((e) => {
-            return e.data
-          })
-        )
-        .catch(console.log)
+      let created_utc = 0
+      response.list.forEach((e) => {
+        let d = e.data
+        let inc = {}
+        inc[d.subreddit_id] = 1
+        created_utc = d.created_utc * 1000
+        if (d.author_fullname == null) return false
+        db_RedditData
+          .collection("user-comments")
+          .updateOne(
+            { author_fullname: d.author_fullname },
+            { $inc: inc },
+            { upsert: true }
+          )
+      })
 
-      await db_RedditCrawler
-        .collection("spider")
-        .updateOne(
-          { spider_name: this.spider_name },
-          { $set: { last_update: Date.now() } }
-        )
+      var date = new Date(created_utc)
+      if (created_utc > Date.now() - 1000 * 60 * 60) await this.timeout(60000)
+
+      await db_RedditCrawler.collection("spider").updateOne(
+        { spider_name: this.spider_name },
+        {
+          $set: {
+            last_update: Date.now(),
+            created_utc,
+            date: date.toString(),
+          },
+        }
+      )
     }
 
     setTimeout(() => {
@@ -93,7 +115,7 @@ class Main {
     }, 1000)
   }
 
-  public async t2LoopStart() {
+  public async t3LoopStart() {
     let db_RedditCrawler: any
     db_RedditCrawler = await mongodb.db("reddit-crawler")
 
@@ -103,40 +125,61 @@ class Main {
     let res = await db_RedditCrawler
       .collection("head")
       .findOneAndUpdate(
-        { tracking: "t2_" },
+        { tracking: "t3_" },
         { $inc: { index: 100 } },
         { returnDocument: "before" }
       )
+
+    if (res.value === null) {
+      let tracker = { tracking: "t3_", index: 1, name: "post" }
+      await db_RedditCrawler.collection("head").insertOne(tracker)
+      res = { value: tracker }
+    }
+
     let indexBefore = res.value.index
     let indexAfter = indexBefore + 100
 
-    // ['t2_698', 't2_699', 't2_69a']
+    // ['t3_698', 't3_699', 't3_69a']
     let arr = Array.from(Array(100).keys()).map((i) => {
-      return "t2_" + parseInt(i + indexBefore).toString(36)
+      return "t3_" + parseInt(i + indexBefore).toString(36)
     })
 
     let response = await api.info(this.credentials, arr)
 
     if (response?.response?.status === 200) {
-      await db_RedditData
-        .collection("posts")
-        .insertMany(
-          response.list.map((e) => {
-            return e.data
-          })
-        )
-        .catch(console.log)
+      let created_utc = 0
+      response.list.forEach((e) => {
+        let d = e.data
+        let inc = {}
+        inc[d.subreddit_id] = 1
+        created_utc = d.created_utc * 1000
+        if (d.author_fullname == null) return false
+        db_RedditData
+          .collection("user-posts")
+          .updateOne(
+            { author_fullname: d.author_fullname },
+            { $inc: inc },
+            { upsert: true }
+          )
+      })
 
-      await db_RedditCrawler
-        .collection("spider")
-        .updateOne(
-          { spider_name: this.spider_name },
-          { $set: { last_update: Date.now() } }
-        )
+      var date = new Date(created_utc)
+      if (created_utc > Date.now() - 1000 * 60 * 60) await this.timeout(60000)
+
+      await db_RedditCrawler.collection("spider").updateOne(
+        { spider_name: this.spider_name },
+        {
+          $set: {
+            last_update: Date.now(),
+            created_utc,
+            date: date.toString(),
+          },
+        }
+      )
     }
 
     setTimeout(() => {
-      this.t2LoopStart()
+      this.t3LoopStart()
     }, 1000)
   }
 
