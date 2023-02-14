@@ -37,9 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var mongodb_1 = require("mongodb");
+var config_json_1 = require("./config.json");
 var Mongo = /** @class */ (function () {
     function Mongo() {
-        this.url = "mongodb://localhost:27017";
+        this.url = "mongodb://".concat(config_json_1.ip, ":27017");
         this.client = null;
     }
     Mongo.prototype.close = function () {
@@ -70,7 +71,12 @@ var Mongo = /** @class */ (function () {
                         return [2 /*return*/, this.client];
                     case 1:
                         _a = this;
-                        return [4 /*yield*/, mongodb_1.MongoClient.connect(this.url)];
+                        return [4 /*yield*/, mongodb_1.MongoClient.connect(this.url, {
+                                auth: {
+                                    username: config_json_1.username,
+                                    password: config_json_1.password
+                                }
+                            })];
                     case 2:
                         _a.client = _b.sent();
                         console.log("-- Mongodb connection opened on " + this.url);

@@ -65,16 +65,13 @@ var Main = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.registerSpider()];
                     case 1:
                         _a.sent();
-                        if (this.current_target === "t1_")
-                            this.t1LoopStart(); // comments
-                        if (this.current_target === "t3_")
-                            this.t3LoopStart(); // posts
+                        this.txLoopStart(this.current_target);
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Main.prototype.t1LoopStart = function () {
+    Main.prototype.txLoopStart = function (t) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
             var db_RedditCrawler, db_RedditData, res, tracker, indexBefore, indexAfter, arr, response, created_utc_1, date;
@@ -89,11 +86,11 @@ var Main = /** @class */ (function () {
                         db_RedditData = _b.sent();
                         return [4 /*yield*/, db_RedditCrawler
                                 .collection("head")
-                                .findOneAndUpdate({ tracking: "t1_" }, { $inc: { index: 100 } }, { returnDocument: "before" })];
+                                .findOneAndUpdate({ tracking: t }, { $inc: { index: 100 } }, { returnDocument: "before" })];
                     case 3:
                         res = _b.sent();
                         if (!(res.value === null)) return [3 /*break*/, 5];
-                        tracker = { tracking: "t1_", index: 1, name: "comment" };
+                        tracker = { tracking: t, index: 1, name: "comment" };
                         return [4 /*yield*/, db_RedditCrawler.collection("head").insertOne(tracker)];
                     case 4:
                         _b.sent();
@@ -103,11 +100,12 @@ var Main = /** @class */ (function () {
                         indexBefore = res.value.index;
                         indexAfter = indexBefore + 100;
                         arr = Array.from(Array(100).keys()).map(function (i) {
-                            return "t1_" + parseInt(i + indexBefore).toString(36);
+                            return t + parseInt(i + indexBefore).toString(36);
                         });
                         return [4 /*yield*/, api_1["default"].info(this.credentials, arr)];
                     case 6:
                         response = _b.sent();
+                        console.log(arr.slice(0, 3));
                         if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 10];
                         created_utc_1 = 0;
                         response.list.forEach(function (e) {
@@ -118,7 +116,7 @@ var Main = /** @class */ (function () {
                             if (d.author_fullname == null)
                                 return false;
                             db_RedditData
-                                .collection("user-comments")
+                                .collection(t === "t1_" ? "user-comments" : "user-posts")
                                 .updateOne({ author_fullname: d.author_fullname }, { $inc: inc }, { upsert: true });
                         });
                         date = new Date(created_utc_1);
@@ -139,79 +137,7 @@ var Main = /** @class */ (function () {
                         _b.label = 10;
                     case 10:
                         setTimeout(function () {
-                            _this.t1LoopStart();
-                        }, 1000);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    Main.prototype.t3LoopStart = function () {
-        var _a;
-        return __awaiter(this, void 0, void 0, function () {
-            var db_RedditCrawler, db_RedditData, res, tracker, indexBefore, indexAfter, arr, response, created_utc_2, date;
-            var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, mongodb_1["default"].db("reddit-crawler")];
-                    case 1:
-                        db_RedditCrawler = _b.sent();
-                        return [4 /*yield*/, mongodb_1["default"].db("reddit-data")];
-                    case 2:
-                        db_RedditData = _b.sent();
-                        return [4 /*yield*/, db_RedditCrawler
-                                .collection("head")
-                                .findOneAndUpdate({ tracking: "t3_" }, { $inc: { index: 100 } }, { returnDocument: "before" })];
-                    case 3:
-                        res = _b.sent();
-                        if (!(res.value === null)) return [3 /*break*/, 5];
-                        tracker = { tracking: "t3_", index: 1, name: "post" };
-                        return [4 /*yield*/, db_RedditCrawler.collection("head").insertOne(tracker)];
-                    case 4:
-                        _b.sent();
-                        res = { value: tracker };
-                        _b.label = 5;
-                    case 5:
-                        indexBefore = res.value.index;
-                        indexAfter = indexBefore + 100;
-                        arr = Array.from(Array(100).keys()).map(function (i) {
-                            return "t3_" + parseInt(i + indexBefore).toString(36);
-                        });
-                        return [4 /*yield*/, api_1["default"].info(this.credentials, arr)];
-                    case 6:
-                        response = _b.sent();
-                        if (!(((_a = response === null || response === void 0 ? void 0 : response.response) === null || _a === void 0 ? void 0 : _a.status) === 200)) return [3 /*break*/, 10];
-                        created_utc_2 = 0;
-                        response.list.forEach(function (e) {
-                            var d = e.data;
-                            var inc = {};
-                            inc[d.subreddit_id] = 1;
-                            created_utc_2 = d.created_utc * 1000;
-                            if (d.author_fullname == null)
-                                return false;
-                            db_RedditData
-                                .collection("user-posts")
-                                .updateOne({ author_fullname: d.author_fullname }, { $inc: inc }, { upsert: true });
-                        });
-                        date = new Date(created_utc_2);
-                        if (!(created_utc_2 > Date.now() - 1000 * 60 * 60)) return [3 /*break*/, 8];
-                        return [4 /*yield*/, this.timeout(60000)];
-                    case 7:
-                        _b.sent();
-                        _b.label = 8;
-                    case 8: return [4 /*yield*/, db_RedditCrawler.collection("spider").updateOne({ spider_name: this.spider_name }, {
-                            $set: {
-                                last_update: Date.now(),
-                                created_utc: created_utc_2,
-                                date: date.toString()
-                            }
-                        })];
-                    case 9:
-                        _b.sent();
-                        _b.label = 10;
-                    case 10:
-                        setTimeout(function () {
-                            _this.t3LoopStart();
+                            _this.txLoopStart(t);
                         }, 1000);
                         return [2 /*return*/];
                 }

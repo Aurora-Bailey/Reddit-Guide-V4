@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb"
+import { ip, username, password } from "./config.json"
 
 class Mongo {
   private url: string
@@ -8,7 +9,7 @@ class Mongo {
   }
 
   constructor() {
-    this.url = `mongodb://localhost:27017`
+    this.url = `mongodb://${ip}:27017`
     this.client = null
   }
 
@@ -25,7 +26,12 @@ class Mongo {
   private async connect() {
     if (this.client) return this.client
     else {
-      this.client = await MongoClient.connect(this.url)
+      this.client = await MongoClient.connect(this.url, {
+        auth: {
+          username,
+          password,
+        },
+      })
       console.log("-- Mongodb connection opened on " + this.url)
       return this.client
     }
