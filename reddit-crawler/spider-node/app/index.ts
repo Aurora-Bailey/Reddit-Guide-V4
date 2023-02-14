@@ -39,10 +39,7 @@ class Main {
   }
 
   public async start() {
-    let db: any
-
     await this.registerSpider()
-
     this.txLoopStart(this.current_target)
   }
 
