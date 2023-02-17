@@ -72,7 +72,6 @@ class Main {
     })
 
     let response = await api.info(this.credentials, arr)
-    console.log(arr.slice(0, 3))
 
     if (response?.response?.status === 200) {
       let created_utc = 0
@@ -120,7 +119,6 @@ class Main {
     })
 
     if (spider === null) {
-      console.log("Waiting for available spider...")
       await this.timeout(10000)
       await this.registerSpider()
     } else {
@@ -137,7 +135,6 @@ class Main {
           { spider_name: this.spider_name },
           { $set: { last_update: Date.now() } }
         )
-      console.log("Success spider has registered...")
     }
 
     return true
@@ -149,3 +146,4 @@ class Main {
 }
 const main = new Main()
 main.start()
+
