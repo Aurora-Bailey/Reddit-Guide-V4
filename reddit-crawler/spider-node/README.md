@@ -28,9 +28,9 @@ https://wiki.crowncloud.net/How_To_Install_Duf_On_Ubuntu_22_04?How_to_Install_La
 #### Install the dependencies
 
 ```
-apt update
+sudo apt update
 
-apt install dirmngr gnupg apt-transport-https ca-certificates software-properties-common
+sudo apt install dirmngr gnupg apt-transport-https ca-certificates software-properties-common
 ```
 
 #### Add MongoDB GPG Key
@@ -46,11 +46,11 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 ```
 
 ```
-apt-get update
+sudo apt update
 ```
 
 ```
-apt-get install -y mongodb-org
+sudo apt install -y mongodb-org
 ```
 
 ```
