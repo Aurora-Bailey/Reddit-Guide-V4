@@ -6,9 +6,10 @@
 
 ```
 Ubuntu 20.04
-M3.meduim
-50gb ssd
+t2.micro
 set key pair
+security group (mongodb + my ip)
+30GB ssd
 ```
 
 ```
@@ -30,7 +31,7 @@ https://wiki.crowncloud.net/How_To_Install_Duf_On_Ubuntu_22_04?How_to_Install_La
 ```
 sudo apt update
 
-sudo apt install dirmngr gnupg apt-transport-https ca-certificates software-properties-common
+sudo apt install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common
 ```
 
 #### Add MongoDB GPG Key
@@ -54,8 +55,8 @@ sudo apt install -y mongodb-org
 ```
 
 ```
-systemctl start mongod
-systemctl enable mongod
+sudo systemctl start mongod
+sudo systemctl enable mongod
 ```
 
 #### Create mongodb user & make public
@@ -79,10 +80,18 @@ mongo -u mongoadmin -p --authenticationDatabase admin
 Open the config file and replace these lines
 
 ```
-sudo vi /etc/mongod.conf
+sudo vim /etc/mongod.conf
 bindIp: 0.0.0.0 #127.0.0.1 defalt
 security:
-authorization: enabled
+  authorization: 'enabled'
+
+net:
+  port: 27017
+  bindIp: 0.0.0.0   #default value is 127.0.0.1
+```
+
+```
+sudo service mongod restart
 ```
 
 ### Run spider node
