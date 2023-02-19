@@ -105,3 +105,4 @@ dist
 
 # Exclude any file with credentials
 *credentials.json
+*config.json

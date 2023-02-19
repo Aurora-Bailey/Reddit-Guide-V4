@@ -84,3 +84,33 @@ bindIp: 0.0.0.0 #127.0.0.1 defalt
 security:
 authorization: enabled
 ```
+
+### Run spider node
+
+Create spot instance
+
+```
+sudo yum install -y gcc-c++ make
+curl -sL https://rpm.nodesource.com/setup_18.x | sudo -E bash -
+sudo yum install -y nodejs
+sudo yum install -y git
+git clone https://github.com/Aurora-Bailey/Reddit-Guide-V4.git
+
+sudo vim ~/Reddit-Guide-V4/reddit-crawler/spider-node/app/tools/config.json
+```
+
+```
+{
+  "ip": "",
+  "username": "",
+  "password": ""
+}
+```
+
+```
+sudo npm install pm2 -g
+pm2 startup
+pm2 save
+pm2 start ~/Reddit-Guide-V4/reddit-crawler/spider-node/app/index.js
+pm2 save
+```
