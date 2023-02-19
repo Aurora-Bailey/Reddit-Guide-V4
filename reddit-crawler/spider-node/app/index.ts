@@ -71,7 +71,12 @@ class Main {
       return t + parseInt(i + indexBefore).toString(36)
     })
 
-    let response = await api.info(this.credentials, arr)
+    let response = null
+    try {
+      response = await api.info(this.credentials, arr)
+    } catch (error) {
+      response = null
+    }
 
     if (response?.response?.status === 200) {
       let created_utc = 0
@@ -146,4 +151,3 @@ class Main {
 }
 const main = new Main()
 main.start()
-
