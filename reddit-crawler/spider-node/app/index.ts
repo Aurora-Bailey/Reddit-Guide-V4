@@ -71,12 +71,23 @@ class Main {
       return t + parseInt(i + indexBefore).toString(36)
     })
 
-    let response = null
     try {
-      response = await api.info(this.credentials, arr)
+      this.handleResponse(await api.info(this.credentials, arr), t)
     } catch (error) {
-      response = null
+      console.error(error)
     }
+
+    setTimeout(() => {
+      this.txLoopStart(t)
+    }, 1000)
+  }
+
+  public async handleResponse(response: any, t: string) {
+    let db_RedditCrawler: any
+    db_RedditCrawler = await mongodb.db("reddit-crawler")
+
+    let db_RedditData: any
+    db_RedditData = await mongodb.db("reddit-data")
 
     if (response?.response?.status === 200) {
       let created_utc = 0
@@ -109,10 +120,6 @@ class Main {
         }
       )
     }
-
-    setTimeout(() => {
-      this.txLoopStart(t)
-    }, 1000)
   }
 
   public async registerSpider() {
